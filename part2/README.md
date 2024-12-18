@@ -4,27 +4,27 @@ In this video we move ahead with Kubernetes concepts
 First we will discuss Kubernetes Architecture and try to understand what happens under the hood when you run `kubectl run nginx --image=nginx`
 
 ## Create CSR
-openssl genrsa -out saiyam.key 2048
-openssl req -new -key saiyam.key -out saiyam.csr -subj "/CN=saiyam/O=group1"
+openssl genrsa -out yasin.key 2048
+openssl req -new -key yasin.key -out yasin.csr -subj "/CN=yasin/O=group1"
 
 ## Sign CSE with Kubernetes CA
-cat saiyam.csr | base64 | tr -d '\n'
+cat yasin.csr | base64 | tr -d '\n'
 
 ```
 apiVersion: certificates.k8s.io/v1
 kind: CertificateSigningRequest
 metadata:
-  name: saiyam
+  name: yasin
 spec:
-  request: BASE64_CSR
+  request: BASE64_CSR #yaha par jo yasin.csr ko base64 may convert kiye ho use apste karo privat-key ko
   signerName: kubernetes.io/kube-apiserver-client
   usages:
   - client auth
 ```
 kubectl apply -f csr.yaml
-kubectl certificate approve saiyam
+kubectl certificate approve yasin
 
-kubectl get csr saiyam -o jsonpath='{.status.certificate}' | base64 --decode > saiyam.crt
+kubectl get csr yasin -o jsonpath='{.status.certificate}' | base64 --decode > yasin.crt
 
 ## Role and role binding
 ```
@@ -45,7 +45,7 @@ metadata:
   namespace: default
 subjects:
 - kind: User
-  name: saiyam
+  name: yasin
   apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: Role
@@ -53,10 +53,10 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ```
 ### setup kubeconfig
-kubectl config set-credentials saiyam --client-certificate=saiyam.crt --client-key=saiyam.key
+kubectl config set-credentials yasin --client-certificate=yasin.crt --client-key=yasin.key
 kubectl config get-contexts
-kubectl config set-context saiyam-context --cluster=kubernetes --namespace=default --user=saiyam
-kubectl config use-context saiyam-context
+kubectl config set-context yasin-context --cluster=kubernetes --namespace=default --user=yasin
+kubectl config use-context yasin-context
 
 
 ### Merging multiple KubeConfig files
